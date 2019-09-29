@@ -1,14 +1,14 @@
+import argparse
 import json
+import logging
 import os
-import sys
 import pathlib
 import shutil
-import logging
+import sys
 
 from .applebooks import AppleBooks
 from .defaults import AppDefaults
 from .errors import ApplicationError
-
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 
@@ -20,9 +20,10 @@ class App:
     def __init__(self):
 
         self.utils = Utilities(self)
-        self.config = Config(self)
 
         self._setup()
+
+        self.config = Config(self)
 
     def _setup(self):
 
@@ -30,7 +31,7 @@ class App:
         self.utils.make_dir(path=AppDefaults.root_dir)
         self.utils.make_dir(path=AppDefaults.day_dir)
 
-    def run(self, args):
+    def run(self, args: argparse.Namespace) -> None:
 
         if args.which == "applebooks":
             self.applebooks = AppleBooks(self)

@@ -1,5 +1,5 @@
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 class AppDefaults:
@@ -7,9 +7,9 @@ class AppDefaults:
     home = Path.home()
     date = datetime.now().strftime("%Y-%m-%d")
 
-    name = "hltsdump"
+    name = "hlts-data"
 
-    root_dir = home / ".hltsdump"
+    root_dir = home / ".hlts-data"
     config_file = root_dir / "config.json"
 
     day_dir = root_dir / date

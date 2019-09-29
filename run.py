@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import argparse
+import sys
 
 from app import App
 
@@ -14,10 +14,8 @@ TODO: type annotate
 """
 
 """
-Default directory is: ~/.hltsdump
-Config file location: ~/.hltsdump/config.json
-Log file location: ~/.hltsdump/app.log
-Default dump directory is: ~/.hltsdump/dumps
+Default directory is: ~/.hlts-data
+Config file location: ~/.hlts-data/config.json
 
 To run with Books:
 - Close Books

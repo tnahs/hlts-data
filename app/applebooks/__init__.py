@@ -1,14 +1,14 @@
-import re
 import json
-import psutil
-import pathlib
-import sqlite3
 import logging
+import pathlib
+import re
+import sqlite3
 from datetime import datetime
+
+import psutil
 
 from .defaults import AppleBooksDefaults
 from .errors import AppleBooksError
-
 
 log = logging.getLogger(__name__)
 
@@ -142,7 +142,7 @@ class AppleBooks:
 
     def _save_annotation_data(self):
         """ """
-        with open(AppleBooksDefaults.dump_json_file, "w") as f:
+        with open(AppleBooksDefaults.output_data_file, "w") as f:
             json.dump(self._data, f, indent=4)
 
 

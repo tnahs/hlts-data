@@ -15,7 +15,7 @@ class AppleBooksDefaults:
     local_db_dir = local_root_dir / "db"
     local_bklibrary_dir = local_db_dir / "BKLibrary"
     local_aeannotation_dir = local_db_dir / "AEAnnotation"
-    dump_json_file = local_root_dir / "dump.json"
+    output_data_file = local_root_dir / "data.json"
 
     # misc
     ns_time_interval_since_1970 = 978307200.0
