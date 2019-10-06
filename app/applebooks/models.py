@@ -61,7 +61,7 @@ class Source:
             "name": self.name,
             "author": self.author,
             "path": self.path,
-            "annotations": [a.serialize(source=False) for a in self._annotations],
+            "annotations": [a.serialize(source=False) for a in self.annotations],
         }
 
         return data
@@ -80,12 +80,32 @@ class Annotation:
 
         self._data = data
 
-        self._process_notes()
-        self._process_tags()
-        self._process_collections()
+        self._process()
 
     def __repr__(self):
-        return f"<{self.__class__.__name__}: {self.text[:50]}...{self.location}>"
+        return f"<{self.__class__.__name__}: {self.text[:50].strip()}...>"
+
+    def _process(self):
+
+        for attr in dir(self):
+            if attr.startswith("_process_"):
+                getattr(self, attr)()
+
+    def _process_text(self):
+
+        _text = self._data.get("text", "")
+
+        # Remove single and double curly quotes.
+        _text = _text.replace("\u2018", "'").replace("\u2019", "'")
+        _text = _text.replace("\u201c", '"').replace("\u201d", '"')
+        # Strip trailing new lines and split into paragraphs.
+        _text = _text.rstrip("\n").split("\n")
+        # Strip trailing whitespace.
+        _text = [t.strip() for t in _text]
+        # Remove any empty items in list.
+        _text = list(filter(None, _text))
+
+        self._text = _text
 
     def _process_tags(self):
 
@@ -94,11 +114,11 @@ class Annotation:
         if not _notes:
             return
 
-        tags = re.findall(RE_TAGS, _notes)
-        tags = [t.strip() for t in tags]
-        tags = [re.sub(TAG_PREFIX, "", t) for t in tags]
+        _tags = re.findall(RE_TAGS, _notes)
+        _tags = [t.strip() for t in _tags]
+        _tags = [t.replace(TAG_PREFIX, "") for t in _tags]
 
-        self._tags = tags
+        self._tags = _tags
 
     def _process_collections(self):
 
@@ -107,20 +127,20 @@ class Annotation:
         if not _notes:
             return
 
-        collections = re.findall(RE_COLLECTIONS, _notes)
-        collections = [c.strip() for c in collections]
-        collections = [re.sub(COLLECTION_PREFIX, "", c) for c in collections]
+        _collections = re.findall(RE_COLLECTIONS, _notes)
+        _collections = [c.strip() for c in _collections]
+        _collections = [c.replace(COLLECTION_PREFIX, "") for c in _collections]
 
         try:
-            collections.remove(STARRED_COLLECTION)
+            _collections.remove(STARRED_COLLECTION)
         except ValueError:
-            """ ValueError means the collections doest not contain the
-            starred_collection therefore it was never 'starred'. """
+            """ ValueError means _collections does not contain the
+            starred_collection item therefore it was never 'starred'. """
             pass
         else:
             self._is_starred = True
 
-        self._collections = collections
+        self._collections = _collections
 
     def _process_notes(self):
 
@@ -130,11 +150,11 @@ class Annotation:
             return
 
         # Remove tags and collections from notes.
-        notes = re.sub(RE_TAGS, "", _notes)
-        notes = re.sub(RE_COLLECTIONS, "", notes)
-        notes = notes.strip()
+        _notes = re.sub(RE_TAGS, "", _notes)
+        _notes = re.sub(RE_COLLECTIONS, "", _notes)
+        _notes = _notes.strip()
 
-        self._notes = notes
+        self.__notes = _notes
 
     def _convert_date(self, epoch: float) -> str:
         """ Converts Epoch to ISO861"""
@@ -165,8 +185,36 @@ class Annotation:
         }.get(index)
 
     @staticmethod
-    def _parse_epubcfi(epubcfi):
-        return None
+    def _parse_epubcfi(epubcfi: str):
+        """ Starting with: epubcfi(/6/20[part01]!/4/182,/1:0,/3:23)
+        via https://github.com/matttrent/ibooks-highlights/blob/master/ibooks_highlights/util.py#L20
+        """
+
+        # Captures one or more numbers after a slash /0 /00 /000 etc.
+        RE_DIGITS = re.compile(r"\/(\d+)")
+
+        if not epubcfi:
+            return None
+
+        # "/6/20[part01]!/4/182,/1:0,/3:23"
+        core = epubcfi[8:-1]
+        # ["/6/20[part01]!/4/182", "/1:0", "/3:23"]
+        core_parts = core.split(",")
+        # "/6/20[part01]!/4/182/1:0"
+        head = core_parts[0] + core_parts[1]
+        # ["/6/20[part01]!/4/182/1", "0"]
+        head_parts = head.split(":")
+        # [6, 20, 4, 182, 1]
+        offsets = [int(x) for x in re.findall(RE_DIGITS, head_parts[0])]
+
+        try:
+            # [6, 20, 4, 182, 1, 0]
+            offsets.append(int(head_parts[1]))
+        except IndexError:
+            pass
+
+        # 0006.0020.0004.0182.0001.0000
+        return ".".join([f"{i:04}" for i in offsets])
 
     @property
     def id(self):
@@ -174,7 +222,7 @@ class Annotation:
 
     @property
     def text(self):
-        return self._data.get("text")
+        return self._text
 
     @property
     def source_id(self):

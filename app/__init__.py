@@ -17,13 +17,13 @@ class App:
 
         self._setup()
 
-    def _setup(self) -> None:
+    def _setup(self):
 
         # Create app root_dir and day_dir directories.
         utilities.make_dir(path=AppDefaults.root_dir)
         utilities.make_dir(path=AppDefaults.day_dir)
 
-    def run(self) -> None:
+    def run(self):
 
         self.applebooks = AppleBooks()
         self.applebooks.run()

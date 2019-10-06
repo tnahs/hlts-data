@@ -20,10 +20,9 @@ class AppleBooks:
         if self._is_applebooks_running():
             raise AppleBooksError("Apple Books currently running.")
 
-        self._setup()
-
     def run(self):
 
+        self._setup()
         self._copy_databases()
         self._query_and_cache_data()
         self._process_data()
@@ -88,6 +87,11 @@ class AppleBooks:
 
     def _process_data(self):
 
+        log.info(
+            f"Processing {len(self._query_data_sources)} sources with "
+            f"{len(self._query_data_annotations)} annotations."
+        )
+
         self._sources = []
         self._annotations = []
 
@@ -111,11 +115,15 @@ class AppleBooks:
 
     def _save_data(self):
         """ """
-        with open(AppleBooksDefaults.output_sources_file, "w") as f:
-            json.dump(self._data_sources, f, indent=4)
+        log.info(f"Saving sources to {AppleBooksDefaults.sources_json}...")
 
-        with open(AppleBooksDefaults.output_annotations_file, "w") as f:
-            json.dump(self._data_annotations, f, indent=4)
+        with open(AppleBooksDefaults.sources_json, "w", encoding="utf-8") as f:
+            json.dump(self._data_sources, f, indent=4, ensure_ascii=False)
+
+        log.info(f"Saving annotations to {AppleBooksDefaults.annotations_json}...")
+
+        with open(AppleBooksDefaults.annotations_json, "w", encoding="utf-8") as f:
+            json.dump(self._data_annotations, f, indent=4, ensure_ascii=False)
 
     @property
     def _data_sources(self):
