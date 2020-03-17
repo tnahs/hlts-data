@@ -55,7 +55,7 @@ class AppleBooks:
         directories for local_bklibrary_dir and local_aeannotation_dir seeing
         as these are created when the source databases are copied over. """
 
-        # Delete local_root_dir. Just in case app is run more than once a day.
+        # Delete local_root_dir. Just incase app is run more than once a day.
         utilities.delete_dir(path=AppleBooksDefaults.local_root_dir)
 
         # Create local_root_dir and local_db_dir.
